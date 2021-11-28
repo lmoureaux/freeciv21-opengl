@@ -1,9 +1,10 @@
 #ifndef MAP_WIDGET_H
 #define MAP_WIDGET_H
 
+#include <QOpenGLFunctions>
 #include <QOpenGLWidget>
 
-class map_widget : public QOpenGLWidget
+class map_widget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     Q_OBJECT
 public:

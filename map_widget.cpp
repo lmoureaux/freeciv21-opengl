@@ -9,6 +9,7 @@ void map_widget::initializeGL()
 {
     // This function gets called before rendering starts. Any initialization of
     // the OpenGL context should be done here.
+    initializeOpenGLFunctions();
 }
 
 void map_widget::paintGL()
