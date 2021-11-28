@@ -18,6 +18,8 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
+        map_widget.cpp
+        map_widget.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
