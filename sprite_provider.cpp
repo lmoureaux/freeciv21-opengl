@@ -50,7 +50,7 @@ std::vector<sprite_provider::drawn_sprite> sprite_provider::render() const
 {
     std::vector<drawn_sprite> sprites;
     for (int ix = 0; ix < m_width; ++ix) {
-        int x = (ix % 2 == 0) ? (ix * 96) : (ix * 96 + 48);
+        int x = (ix % 2 == 0) ? (ix * 96 + 48) : (ix * 96 + 96);
         for (int iy = 0; iy < m_height; ++iy) {
             int y = iy * 24 + 24;
             int terrain = m_map[ix * m_height + iy];
