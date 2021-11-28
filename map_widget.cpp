@@ -1,6 +1,10 @@
+#include "sprite_provider.h"
+
 #include "map_widget.h"
 
-map_widget::map_widget(QWidget *parent) : QOpenGLWidget(parent)
+map_widget::map_widget(QWidget *parent)
+    : QOpenGLWidget(parent)
+    , m_provider(new sprite_provider(this))
 {
 
 }
