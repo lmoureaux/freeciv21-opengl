@@ -2,8 +2,22 @@
 
 #include <QRandomGenerator>
 
+/**
+ * @class sprite_provider
+ * @brief Implements the sprite selection logic.
+ */
+
+/**
+ * @struct sprite_provider::drawn_sprite
+ * @brief Groups the information needed to draw a sprite on the screen.
+ */
+
+/**
+ * @brief Constructor
+ */
 sprite_provider::sprite_provider(QObject *parent) : QObject(parent)
 {
+    // Load terrain sprites
     const auto terrains = {
         QStringLiteral("arctic"),
         QStringLiteral("desert"),
@@ -29,6 +43,9 @@ sprite_provider::sprite_provider(QObject *parent) : QObject(parent)
     }
 }
 
+/**
+ * @brief Returns the set of drawn_sprites to use to render the map.
+ */
 std::vector<sprite_provider::drawn_sprite> sprite_provider::render() const
 {
     std::vector<drawn_sprite> sprites;
