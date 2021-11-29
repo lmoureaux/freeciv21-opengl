@@ -1,3 +1,5 @@
+#version 330
+
 /*
  * Fragment shader
  * ===============
@@ -10,7 +12,7 @@
 // Varying are data passed to the fragment shader (interpolating smoothly
 // between vertices in a triangle).
 // The name must match the one in the fragment shader.
-varying vec2 frag_uv; // Coordinates within the texture
+in vec2 frag_uv; // Coordinates within the texture
 
 // Uniforms are variables that are the same for every vertex in a draw call
 uniform sampler2D sprite; // Texture "samplers" retrieve texture data
@@ -19,4 +21,22 @@ void main(void)
 {
     // Trivial :)
     gl_FragColor = texture2D(sprite, frag_uv);
+
+    // Manipulating the color here is basically the only way to debug things
+    // For instance, this is the basic thing to do when you can't see
+    // anything (draw flat red):
+//    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+
+    // This shows your UV coordinates
+//    gl_FragColor.gb = frag_uv;
+
+    if (abs(frag_uv.x - 1.0) < 0.01 || abs(frag_uv.x) < 0.01) {
+        gl_FragColor.r = 1.0;
+    }
+    if (abs(frag_uv.y - 1.0) < 0.01 || abs(frag_uv.y) < 0.01) {
+        gl_FragColor.g = 1.0;
+    }
+    if (gl_FragColor.a < 0.1) {
+        gl_FragColor.b = 1.0;
+    }
 }

@@ -22,7 +22,7 @@ public:
     std::vector<drawn_sprite> render() const;
 
 private:
-    const int m_width = 20, m_height = 20;
+    const int m_width = 20, m_height = 40;
     std::vector<QIcon> m_sprites;
     std::vector<int> m_map;
 };

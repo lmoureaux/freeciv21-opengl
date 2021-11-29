@@ -1,3 +1,5 @@
+#version 330
+
 /*
  * Vertex shader
  * =============
@@ -6,9 +8,9 @@
  * position and passes arbitrary data to the fragment shader.
  */
 
-// Attributes are variables recieved for each vertex
-attribute vec2 xy; // Screen coordinates
-attribute vec2 uv; // Coordinates within the texture
+// Variables received for each vertex
+layout(location = 0) in vec2 xy; // Screen coordinates
+layout(location = 1) in vec2 uv; // Coordinates within the texture
 
 // Uniforms are variables that are the same for every vertex in a draw call
 uniform mat4 projection_matrix;
@@ -16,7 +18,7 @@ uniform mat4 projection_matrix;
 // Varying are data passed to the fragment shader (interpolating smoothly
 // between vertices in a triangle).
 // The name must match the one in the fragment shader.
-varying vec2 frag_uv; // Coordinates within the texture
+out vec2 frag_uv; // Coordinates within the texture
 
 void main(void)
 {
