@@ -85,9 +85,15 @@ void map_widget::initializeGL()
          0.0f, 48.0f,
     };
 
+    // Create a Vertex Buffer Object (VBO) to move all this to the GPU
+    m_xy_vbo.reset(new QOpenGLBuffer);
+    m_xy_vbo->create();
+    m_xy_vbo->bind(); // Make it the current VBO
     // Send to the GPU
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, xy_data);
+    m_xy_vbo->allocate(xy_data, sizeof(xy_data));
+
     // This will be the attribute at location 0
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     // Second buffer: uv coordinates (coordinates within the sprite)
@@ -101,8 +107,14 @@ void map_widget::initializeGL()
         1.0f, 1.0f,
         0.0f, 1.0f,
     };
+    m_uv_vbo.reset(new QOpenGLBuffer);
+    m_uv_vbo->create();
+    m_uv_vbo->bind(); // Make it the current VBO
+    // Send to the GPU
+    m_uv_vbo->allocate(uv_data, sizeof(uv_data));
+
     // This will be the attribute at location 1
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, uv_data);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
 
     // Enable alpha blending (otherwise we get into big trouble)
