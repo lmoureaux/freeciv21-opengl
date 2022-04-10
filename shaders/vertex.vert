@@ -10,16 +10,18 @@
 
 // Variables received for each vertex
 layout(location = 0) in vec2 xy; // Screen coordinates
-layout(location = 1) in vec2 uv; // Coordinates within the texture
+layout(location = 1) in vec2 offset; // Per-sprite offset
+layout(location = 2) in vec2 uv; // Coordinates within the texture
+layout(location = 3) in float sprite_index; // Which sprite to use
 
 // Uniforms are variables that are the same for every vertex in a draw call
 uniform mat4 projection_matrix;
-uniform vec2 offset;
 
 // Varying are data passed to the fragment shader (interpolating smoothly
 // between vertices in a triangle).
 // The name must match the one in the fragment shader.
 out vec2 frag_uv; // Coordinates within the texture
+flat out float frag_sprite_index; // Index in the texture array
 
 void main(void)
 {
@@ -35,4 +37,5 @@ void main(void)
     // Pass uv directly to the fragment shader. The GPU will interpolate
     // automatically.
     frag_uv = uv;
+    frag_sprite_index = sprite_index;
 }

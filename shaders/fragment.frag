@@ -13,15 +13,15 @@
 // between vertices in a triangle).
 // The name must match the one in the fragment shader.
 in vec2 frag_uv; // Coordinates within the texture
+flat in float frag_sprite_index; // Index within the array
 
 // Uniforms are variables that are the same for every vertex in a draw call
 uniform sampler2DArray atlas; // Texture "samplers" retrieve texture data
-uniform int index; // Index within the atlas
 
 void main(void)
 {
     // Trivial :)
-    gl_FragColor = texture(atlas, vec3(frag_uv, index));
+    gl_FragColor = texture(atlas, vec3(frag_uv, frag_sprite_index));
 
     // Manipulating the color here is basically the only way to debug things
     // For instance, this is the basic thing to do when you can't see
@@ -30,7 +30,7 @@ void main(void)
 
     // This shows your UV coordinates
 //    gl_FragColor.gb = frag_uv;
-
+/*
     if (abs(frag_uv.x - 1.0) < 0.01 || abs(frag_uv.x) < 0.01) {
         gl_FragColor.r = 1.0;
     }
@@ -40,4 +40,5 @@ void main(void)
     if (gl_FragColor.a < 0.1) {
         gl_FragColor.b = 1.0;
     }
+*/
 }

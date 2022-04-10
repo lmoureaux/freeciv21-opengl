@@ -22,7 +22,9 @@ map_widget::~map_widget()
     m_atlas = nullptr;
     m_vao = nullptr;
     m_xy_vbo = nullptr;
+    m_offset_vbo = nullptr;
     m_uv_vbo = nullptr;
+    m_sprite_index_vbo = nullptr;
 
     doneCurrent();
 }
@@ -99,7 +101,18 @@ void map_widget::initializeGL()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    // Second buffer: uv coordinates (coordinates within the sprite)
+    // Create a VBO for the offset, but dont send any data yet
+    m_offset_vbo = std::make_unique<QOpenGLBuffer>();
+    m_offset_vbo->create();
+    m_offset_vbo->setUsagePattern(QOpenGLBuffer::StreamDraw);
+    m_offset_vbo->bind(); // Make it the current VBO
+
+    // This will be the attribute at location 1
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribDivisor(1, 1); // Set it up for instancing
+    glEnableVertexAttribArray(1);
+
+    // Third buffer: uv coordinates (coordinates within the sprite)
     static GLfloat uv_data[] = {
         // Triangle 1
         0.0f, 0.0f,
@@ -116,9 +129,20 @@ void map_widget::initializeGL()
     // Send to the GPU
     m_uv_vbo->allocate(uv_data, sizeof(uv_data));
 
-    // This will be the attribute at location 1
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(1);
+    // This will be the attribute at location 2
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(2);
+
+    // Create a VBO for the sprite index, but dont send any data yet
+    m_sprite_index_vbo = std::make_unique<QOpenGLBuffer>();
+    m_sprite_index_vbo->create();
+    m_sprite_index_vbo->setUsagePattern(QOpenGLBuffer::StreamDraw);
+    m_sprite_index_vbo->bind(); // Make it the current VBO
+
+    // This will be the attribute at location 3
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribDivisor(3, 1); // Set it up for instancing
+    glEnableVertexAttribArray(3);
 
     // Enable alpha blending (otherwise we get into big trouble)
     glEnable(GL_BLEND);
@@ -144,18 +168,32 @@ void map_widget::paintGL()
     auto matrix = m_projection_matrix;
     m_program->setUniformValue("projection_matrix", matrix);
 
-    // Render the map
+    // Turn inputs into something that GL can digest
     const auto sprites = m_provider->render();
-    for (std::size_t i = 0; i < sprites.size(); ++i) {
-        // Should change it to reflect sprites[i].x and .y
-        m_program->setUniformValue("offset", QVector2D(sprites[i].x, sprites[i].y));
-        m_program->setUniformValue("index", static_cast<GLint>(sprites[i].sprite_index));
+    qInfo() << "Drawing" << sprites.size() << "sprites";
 
-        // This does the actual drawing...
-        glDrawArrays(GL_TRIANGLES,  // ...of triangles
-                     0,             // ...starting from index 0 of the buffers
-                     2 * 3);        // ...and using 6 vertices (two triangles)
+    std::vector<GLfloat> offsets;
+    std::vector<GLfloat> sprite_indices;
+    for (const auto &sprite: sprites) {
+        offsets.push_back(sprite.x);
+        offsets.push_back(sprite.y);
+        sprite_indices.push_back(sprite.sprite_index);
     }
+
+    // Fill the instanced VBOs
+    m_offset_vbo->bind();
+    m_offset_vbo->allocate(offsets.data(), offsets.size() * sizeof(GLfloat));
+
+    m_sprite_index_vbo->bind();
+    m_sprite_index_vbo->allocate(sprite_indices.data(),
+                                 sprite_indices.size() * sizeof(GLfloat));
+
+    // Render the map
+    // This does the actual (instanced) drawing...
+    glDrawArraysInstanced(GL_TRIANGLES,    // ...of triangles
+                          0,               // ...starting from index 0 of the buffers
+                          2 * 3,           // ...using 6 vertices (two triangles) per instance
+                          sprites.size()); // ...and this many instances
 
     // Disable our stuff
     m_atlas->release();

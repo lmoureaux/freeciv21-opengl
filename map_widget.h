@@ -2,7 +2,7 @@
 #define MAP_WIDGET_H
 
 #include <QOpenGLBuffer>
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
@@ -13,7 +13,7 @@
 
 class sprite_provider;
 
-class map_widget : public QOpenGLWidget, protected QOpenGLFunctions
+class map_widget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
 public:
@@ -30,7 +30,8 @@ private:
 
     QMatrix4x4 m_projection_matrix;
     std::unique_ptr<QOpenGLVertexArrayObject> m_vao;
-    std::unique_ptr<QOpenGLBuffer> m_xy_vbo, m_uv_vbo;
+    std::unique_ptr<QOpenGLBuffer> m_xy_vbo, m_offset_vbo,
+                                   m_uv_vbo, m_sprite_index_vbo;
     QOpenGLShaderProgram *m_program = nullptr;
     std::unique_ptr<QOpenGLTexture> m_atlas;
 };
