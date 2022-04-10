@@ -2,6 +2,7 @@
 
 #include "map_widget.h"
 
+#include <QMouseEvent>
 #include <QOpenGLBuffer>
 #include <QOpenGLPixelTransferOptions>
 
@@ -166,6 +167,7 @@ void map_widget::paintGL()
 
     // Set uniforms that won't change per sprite
     auto matrix = m_projection_matrix;
+    matrix.translate(-origin.x(), origin.y());
     m_program->setUniformValue("projection_matrix", matrix);
 
     // Turn inputs into something that GL can digest
@@ -213,4 +215,14 @@ void map_widget::resizeGL(int w, int h)
     trans.translate(-1, -1);
     trans.scale(2.0 / w, 2.0 / h);
     m_projection_matrix = trans;
+}
+
+void map_widget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::RightButton && event->modifiers() == Qt::NoModifier) {
+        // Center on right click
+        origin += event->localPos() - QPointF(width() / 2, height() / 2);
+        update();
+        event->accept();
+    }
 }

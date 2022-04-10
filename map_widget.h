@@ -25,6 +25,8 @@ protected:
     void paintGL() override;
     void resizeGL(int w, int h) override;
 
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
 private:
     sprite_provider *m_provider;
 
@@ -34,6 +36,8 @@ private:
                                    m_uv_vbo, m_sprite_index_vbo;
     QOpenGLShaderProgram *m_program = nullptr;
     std::unique_ptr<QOpenGLTexture> m_atlas;
+
+    QPointF origin;
 };
 
 #endif // MAP_WIDGET_H
