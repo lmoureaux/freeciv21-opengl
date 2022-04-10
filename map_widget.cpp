@@ -3,6 +3,7 @@
 #include "map_widget.h"
 
 #include <QOpenGLBuffer>
+#include <QOpenGLPixelTransferOptions>
 
 map_widget::map_widget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -18,9 +19,7 @@ map_widget::~map_widget()
 
     // Destroy everything
     delete m_program;
-    for (auto tex: m_textures) {
-        delete tex;
-    }
+    m_atlas = nullptr;
     m_vao = nullptr;
     m_xy_vbo = nullptr;
     m_uv_vbo = nullptr;
@@ -59,14 +58,18 @@ void map_widget::initializeGL()
     // (especially the VAO creation)
     m_program->bind();
 
-    // Create textures
-    for (const auto &icon: m_provider->sprites()) {
-        // Create one 2D texture per sprite
-        auto tex = new QOpenGLTexture(QOpenGLTexture::Target2D);
-        // Set the data. The size is hard coded for simplicity...
-        tex->setData(icon.pixmap(96, 48).toImage());
-        // Save it for later
-        m_textures.push_back(tex);
+    // Create the texture atlas
+    auto icons = m_provider->sprites();
+    m_atlas = std::make_unique<QOpenGLTexture>(QOpenGLTexture::Target2DArray);
+    m_atlas->setFormat(QOpenGLTexture::RGBA8_UNorm);
+    m_atlas->setSize(96, 48); // Size hard coded for simplicity
+    m_atlas->setLayers(icons.size());
+    m_atlas->allocateStorage();
+    for (std::size_t i = 0; i < icons.size(); ++i) {
+        auto image = icons[i].pixmap(96, 48).toImage().convertToFormat(QImage::Format_RGBA8888);
+        QOpenGLPixelTransferOptions options;
+        options.setAlignment(1);
+        m_atlas->setData(0, i, QOpenGLTexture::RGBA, QOpenGLTexture::UInt8, image.constBits(), &options);
     }
 
     // Build the VAO, which records which memory buffers are used where
@@ -132,6 +135,11 @@ void map_widget::paintGL()
     // Make the program current
     m_program->bind();
 
+    // Make the atlas active
+    // It has texture ID 0 because it's the first... I think
+    m_atlas->bind();
+    m_program->setUniformValue("atlas", 0);
+
     // Render the map
     const auto sprites = m_provider->render();
     for (std::size_t i = 0; i < sprites.size(); ++i) {
@@ -140,22 +148,16 @@ void map_widget::paintGL()
         auto matrix = m_projection_matrix;
         matrix.translate(sprites[i].x, sprites[i].y);
         m_program->setUniformValue("projection_matrix", matrix);
-
-        // Make the texture active
-        // It has texture ID 0 because it's the first... I think
-        auto &tex = m_textures[sprites[i].sprite_index];
-        tex->bind();
-        m_program->setUniformValue("sprite", 0);
+        m_program->setUniformValue("index", static_cast<GLint>(sprites[i].sprite_index));
 
         // This does the actual drawing...
         glDrawArrays(GL_TRIANGLES,  // ...of triangles
                      0,             // ...starting from index 0 of the buffers
                      2 * 3);        // ...and using 6 vertices (two triangles)
-
-        // Disable the texture
-        tex->release();
     }
 
+    // Disable our stuff
+    m_atlas->release();
     m_program->release();
 }
 

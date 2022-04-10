@@ -15,12 +15,13 @@
 in vec2 frag_uv; // Coordinates within the texture
 
 // Uniforms are variables that are the same for every vertex in a draw call
-uniform sampler2D sprite; // Texture "samplers" retrieve texture data
+uniform sampler2DArray atlas; // Texture "samplers" retrieve texture data
+uniform int index; // Index within the atlas
 
 void main(void)
 {
     // Trivial :)
-    gl_FragColor = texture2D(sprite, frag_uv);
+    gl_FragColor = texture(atlas, vec3(frag_uv, index));
 
     // Manipulating the color here is basically the only way to debug things
     // For instance, this is the basic thing to do when you can't see

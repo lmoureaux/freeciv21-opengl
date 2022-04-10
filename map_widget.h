@@ -32,7 +32,7 @@ private:
     std::unique_ptr<QOpenGLVertexArrayObject> m_vao;
     std::unique_ptr<QOpenGLBuffer> m_xy_vbo, m_uv_vbo;
     QOpenGLShaderProgram *m_program = nullptr;
-    std::vector<QOpenGLTexture *> m_textures;
+    std::unique_ptr<QOpenGLTexture> m_atlas;
 };
 
 #endif // MAP_WIDGET_H
