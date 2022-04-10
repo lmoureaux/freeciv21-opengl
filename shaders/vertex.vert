@@ -14,6 +14,7 @@ layout(location = 1) in vec2 uv; // Coordinates within the texture
 
 // Uniforms are variables that are the same for every vertex in a draw call
 uniform mat4 projection_matrix;
+uniform vec2 offset;
 
 // Varying are data passed to the fragment shader (interpolating smoothly
 // between vertices in a triangle).
@@ -22,10 +23,14 @@ out vec2 frag_uv; // Coordinates within the texture
 
 void main(void)
 {
+    // The full position is the (sprite-wide) offset plus the relative
+    // location of this vertex
+    vec2 pos = offset + xy;
+
     // Use the projection matrix to set the position. The last coordinate
-    // is a trick to allow tranlations by setting the appropriate elements
+    // is a trick to allow translations by setting the appropriate elements
     // of the projection matrix.
-    gl_Position = projection_matrix * vec4(xy.x, xy.y, 0.0, 1.0);
+    gl_Position = projection_matrix * vec4(pos.x, pos.y, 0.0, 1.0);
 
     // Pass uv directly to the fragment shader. The GPU will interpolate
     // automatically.

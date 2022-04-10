@@ -140,14 +140,15 @@ void map_widget::paintGL()
     m_atlas->bind();
     m_program->setUniformValue("atlas", 0);
 
+    // Set uniforms that won't change per sprite
+    auto matrix = m_projection_matrix;
+    m_program->setUniformValue("projection_matrix", matrix);
+
     // Render the map
     const auto sprites = m_provider->render();
     for (std::size_t i = 0; i < sprites.size(); ++i) {
-        // Set uniforms that won't change per sprite
         // Should change it to reflect sprites[i].x and .y
-        auto matrix = m_projection_matrix;
-        matrix.translate(sprites[i].x, sprites[i].y);
-        m_program->setUniformValue("projection_matrix", matrix);
+        m_program->setUniformValue("offset", QVector2D(sprites[i].x, sprites[i].y));
         m_program->setUniformValue("index", static_cast<GLint>(sprites[i].sprite_index));
 
         // This does the actual drawing...
