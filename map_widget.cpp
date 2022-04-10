@@ -167,7 +167,7 @@ void map_widget::paintGL()
 
     // Set uniforms that won't change per sprite
     auto matrix = m_projection_matrix;
-    matrix.translate(-origin.x(), origin.y());
+    matrix.translate(-origin.x(), -origin.y());
     m_program->setUniformValue("projection_matrix", matrix);
 
     // Turn inputs into something that GL can digest
@@ -209,11 +209,11 @@ void map_widget::resizeGL(int w, int h)
 
     // The OpenGL coordinate system has (-1, -1) at the bottom left and
     // (1, 1) at the top right. Change this to be pixel coordinates with
-    // (0, 0) at the bottom left and whatever window width and height at
-    // the top right.
+    // (0, 0) at the top left and whatever window width and height at
+    // the bottom right.
     auto trans = QTransform();
-    trans.translate(-1, -1);
-    trans.scale(2.0 / w, 2.0 / h);
+    trans.translate(-1, 1);
+    trans.scale(2.0 / w, -2.0 / h);
     m_projection_matrix = trans;
 }
 
