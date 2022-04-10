@@ -7,6 +7,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
+#include <QPropertyAnimation>
 
 #include <memory>
 #include <vector>
@@ -16,9 +17,14 @@ class sprite_provider;
 class map_widget : public QOpenGLWidget, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
+    Q_PROPERTY(QPointF origin READ origin WRITE setOrigin)
+
 public:
     explicit map_widget(QWidget *parent = nullptr);
     virtual ~map_widget();
+
+    QPointF origin() const { return m_origin; }
+    void setOrigin(const QPointF &origin, bool animate = false);
 
 protected:
     void initializeGL() override;
@@ -37,7 +43,8 @@ private:
     QOpenGLShaderProgram *m_program = nullptr;
     std::unique_ptr<QOpenGLTexture> m_atlas;
 
-    QPointF origin;
+    QPointF m_origin;
+    std::unique_ptr<QPropertyAnimation> m_center_animation;
 };
 
 #endif // MAP_WIDGET_H

@@ -8,6 +8,7 @@
 
 map_widget::map_widget(QWidget *parent)
     : QOpenGLWidget(parent)
+    , m_center_animation(std::make_unique<QPropertyAnimation>(this, "origin"))
     , m_provider(new sprite_provider(this))
 {
     // Identity matrix is a good start
@@ -28,6 +29,20 @@ map_widget::~map_widget()
     m_sprite_index_vbo = nullptr;
 
     doneCurrent();
+}
+
+void map_widget::setOrigin(const QPointF &origin, bool animate)
+{
+    if (animate) {
+        m_center_animation->stop();
+        m_center_animation->setDuration(100);
+        m_center_animation->setEndValue(origin);
+        m_center_animation->setCurrentTime(0);
+        m_center_animation->start();
+    } else {
+        m_origin = origin;
+        update();
+    }
 }
 
 void map_widget::initializeGL()
@@ -167,7 +182,7 @@ void map_widget::paintGL()
 
     // Set uniforms that won't change per sprite
     auto matrix = m_projection_matrix;
-    matrix.translate(-origin.x(), -origin.y());
+    matrix.translate(-int(origin().x()), -int(origin().y()));
     m_program->setUniformValue("projection_matrix", matrix);
 
     // Turn inputs into something that GL can digest
@@ -221,8 +236,7 @@ void map_widget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton && event->modifiers() == Qt::NoModifier) {
         // Center on right click
-        origin += event->localPos() - QPointF(width() / 2, height() / 2);
-        update();
+        setOrigin(origin() + event->localPos() - QPointF(width() / 2, height() / 2), true);
         event->accept();
     }
 }
